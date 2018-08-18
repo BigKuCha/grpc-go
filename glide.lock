@@ -1,0 +1,6 @@
+hash: ea9ae9f7d31b70c4ea254f3925a2677a2bd47d7f72ad8587687f20b8b01ac11b
+updated: 2018-08-18T22:41:43.997784+08:00
+imports:
+- name: google.golang.org/grpc
+  version: 32fb0ac620c32ba40a4626ddf94d90d12cce3455
+testImports: []

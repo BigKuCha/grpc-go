@@ -1,0 +1,4 @@
+package: github.com/bigkucha/grpc-go
+import:
+- package: google.golang.org/grpc
+  version: ^1.14.0

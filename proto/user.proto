@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package user;
+
+// 定义一个服务
+service UserService {
+    // 获取用户，传入ID，返回用户信息
+    rpc GetUserInfo (RequestUser) returns (User) {
+    }
+    // 创建用户，传入用户信息，创建成功返回用户完整信息
+    rpc Create (User) returns (User) {
+    }
+}
+
+// 请求查询用户
+message RequestUser {
+    int32 id = 1;
+}
+
+message User {
+    int32 ID = 2;
+    string Name = 3;
+    string Mobile = 4;
+    int32 Age = 5;
+}
