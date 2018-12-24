@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package pbs;
+
+service Teacher {
+    rpc Get (RequestTeacher) returns (ResponseTeacher) {
+    }
+}
+
+message RequestTeacher {
+    int32 id = 1;
+}
+
+message ResponseTeacher {
+    int32 id = 2;
+    string name = 3;
+    Type type = 4;
+    enum Type {
+        Male = 0;
+        Female = 1;
+    }
+}
