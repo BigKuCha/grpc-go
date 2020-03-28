@@ -2,19 +2,24 @@ package main
 
 import (
 	"context"
-	"github.com/bigkucha/grpc-go/pbs"
+	"fmt"
 	pb "github.com/bigkucha/grpc-go/proto"
+	"go.etcd.io/etcd/clientv3"
+	etcdnaming "go.etcd.io/etcd/clientv3/naming"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/naming"
 	"google.golang.org/grpc/reflection"
 	"log"
 	"net"
+	"time"
 )
 
-const port = ":50001"
+const ip = "127.0.0.1"
+const port = "50001"
+const target = "/services/UserService"
 
 // server is used to implement
 type server struct{}
-type studentServer struct{}
 
 func (s *server) GetUserInfo(ctx context.Context, in *pb.RequestUser) (*pb.User, error) {
 	log.Printf("请求查看用户 %d 的信息", in.Id)
@@ -26,20 +31,51 @@ func (s *server) Create(ctx context.Context, in *pb.User) (*pb.User, error) {
 	return &pb.User{ID: 999, Name: in.Name, Mobile: in.Mobile, Age: in.Age}, nil
 }
 
-func (ss *studentServer) Get(ctx context.Context, in *pbs.RequestStudent) (*pbs.ResponseStudent, error) {
-	log.Printf("请求查看学生 %d 到信息", in.Id)
-	return &pbs.ResponseStudent{Id: in.Id, Name: "张三", Type: pbs.ResponseStudent_Female}, nil
-}
-
 func main() {
-	lis, err := net.Listen("tcp", port)
+	addr := net.JoinHostPort(ip, port)
+	// 服务注册
+	client, err := clientv3.New(clientv3.Config{
+		Endpoints:            []string{"localhost:2379"},
+		AutoSyncInterval:     0,
+		DialTimeout:          5 * time.Second,
+		DialKeepAliveTime:    0,
+		DialKeepAliveTimeout: 0,
+		MaxCallSendMsgSize:   0,
+		MaxCallRecvMsgSize:   0,
+		TLS:                  nil,
+		Username:             "",
+		Password:             "",
+		RejectOldCluster:     false,
+		DialOptions:          nil,
+		Context:              nil,
+		LogConfig:            nil,
+		PermitWithoutStream:  false,
+	})
+	if err != nil {
+		panic(err)
+	}
+	lease, err := client.Lease.Grant(context.TODO(), 10)
+	if err != nil {
+		panic(err)
+	}
+	resolver := etcdnaming.GRPCResolver{Client: client}
+	err = resolver.Update(context.TODO(), target, naming.Update{
+		Op:       naming.Add,
+		Addr:     addr,
+		Metadata: "metadata-=",
+	}, clientv3.WithLease(lease.ID))
+	_, _ = client.Lease.KeepAlive(context.TODO(), lease.ID)
+	fmt.Println("----", err)
+	if err != nil {
+		fmt.Println("===", err)
+	}
+	fmt.Println(addr)
+	lis, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
 	pb.RegisterUserServiceServer(s, &server{})
-	pbs.RegisterStudentServer(s, &studentServer{})
-	//pb.RegisterOrderServer(s, &server{})
 	// Register reflection service on gRPC server.
 	reflection.Register(s)
 	if err := s.Serve(lis); err != nil {
