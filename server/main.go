@@ -35,21 +35,8 @@ func main() {
 	addr := net.JoinHostPort(ip, port)
 	// 服务注册
 	client, err := clientv3.New(clientv3.Config{
-		Endpoints:            []string{"localhost:2379"},
-		AutoSyncInterval:     0,
-		DialTimeout:          5 * time.Second,
-		DialKeepAliveTime:    0,
-		DialKeepAliveTimeout: 0,
-		MaxCallSendMsgSize:   0,
-		MaxCallRecvMsgSize:   0,
-		TLS:                  nil,
-		Username:             "",
-		Password:             "",
-		RejectOldCluster:     false,
-		DialOptions:          nil,
-		Context:              nil,
-		LogConfig:            nil,
-		PermitWithoutStream:  false,
+		Endpoints:   []string{"localhost:2379"},
+		DialTimeout: 5 * time.Second,
 	})
 	if err != nil {
 		panic(err)
