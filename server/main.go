@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	pb "github.com/bigkucha/grpc-go/proto"
+	etcdresolver "github.com/bigkucha/grpc-go/resolver"
 	"go.etcd.io/etcd/clientv3"
-	etcdnaming "go.etcd.io/etcd/clientv3/naming"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/naming"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/resolver"
 	"log"
 	"net"
 	"time"
@@ -16,7 +17,7 @@ import (
 
 const ip = "127.0.0.1"
 const port = "50001"
-const target = "/services/UserService"
+const serviceName = "UserService"
 
 // server is used to implement
 type server struct{}
@@ -31,9 +32,8 @@ func (s *server) Create(ctx context.Context, in *pb.User) (*pb.User, error) {
 	return &pb.User{ID: 999, Name: in.Name, Mobile: in.Mobile, Age: in.Age}, nil
 }
 
-func main() {
-	addr := net.JoinHostPort(ip, port)
-	// 服务注册
+func registerSrv() {
+	// 连接etcd
 	client, err := clientv3.New(clientv3.Config{
 		Endpoints:   []string{"localhost:2379"},
 		DialTimeout: 5 * time.Second,
@@ -41,22 +41,38 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	// 声明租约
 	lease, err := client.Lease.Grant(context.TODO(), 10)
 	if err != nil {
 		panic(err)
 	}
-	resolver := etcdnaming.GRPCResolver{Client: client}
-	err = resolver.Update(context.TODO(), target, naming.Update{
-		Op:       naming.Add,
-		Addr:     addr,
-		Metadata: "metadata-=",
-	}, clientv3.WithLease(lease.ID))
-	_, _ = client.Lease.KeepAlive(context.TODO(), lease.ID)
-	fmt.Println("----", err)
-	if err != nil {
-		fmt.Println("===", err)
+	addr := net.JoinHostPort(ip, port)
+	target := etcdresolver.Target(serviceName, addr)
+	address := resolver.Address{
+		Addr:       addr,
+		Type:       0,
+		ServerName: "",
+		Metadata:   nil,
 	}
-	fmt.Println(addr)
+	addressStr, _ := json.Marshal(address)
+	// 写入etcd
+	_, err = client.Put(context.TODO(), target, string(addressStr), clientv3.WithLease(lease.ID))
+	if err != nil {
+		panic(err)
+	}
+	ch, _ := client.KeepAlive(context.TODO(), lease.ID)
+	go func() {
+		for response := range ch {
+			_ = response
+			fmt.Printf("%#v\n", response)
+		}
+	}()
+}
+
+func main() {
+	// 注册服务
+	addr := net.JoinHostPort(ip, port)
+	registerSrv()
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
