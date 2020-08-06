@@ -3,9 +3,10 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	pb "github.com/bigkucha/grpc-go/proto"
 	etcdresolver "github.com/bigkucha/grpc-go/resolver"
+	"github.com/bigkucha/grpc-go/trace"
+	zipkingrpc "github.com/openzipkin/zipkin-go/middleware/grpc"
 	"go.etcd.io/etcd/clientv3"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -29,6 +30,7 @@ func (s *server) GetUserInfo(ctx context.Context, in *pb.RequestUser) (*pb.User,
 
 func (s *server) Create(ctx context.Context, in *pb.User) (*pb.User, error) {
 	log.Printf("创建用户，%+v", in)
+	time.Sleep(time.Second)
 	return &pb.User{ID: 999, Name: in.Name, Mobile: in.Mobile, Age: in.Age}, nil
 }
 
@@ -64,7 +66,7 @@ func registerSrv() {
 	go func() {
 		for response := range ch {
 			_ = response
-			fmt.Printf("%#v\n", response)
+			//fmt.Printf("keep: %#v\n", response)
 		}
 	}()
 }
@@ -77,7 +79,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	s := grpc.NewServer()
+	tracer := trace.GetZipkinBasicTracer("GRPCServer", addr)
+	s := grpc.NewServer(grpc.StatsHandler(zipkingrpc.NewServerHandler(tracer)))
 	pb.RegisterUserServiceServer(s, &server{})
 	// Register reflection service on gRPC server.
 	reflection.Register(s)

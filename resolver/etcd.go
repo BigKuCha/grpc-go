@@ -7,6 +7,7 @@ import (
 	"go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/mvcc/mvccpb"
 	"google.golang.org/grpc/resolver"
+	"log"
 )
 
 type etcdBuilder struct {
@@ -41,7 +42,7 @@ func (e etcdBuilder) Build(target resolver.Target, cc resolver.ClientConn, opts 
 
 func (e etcdResolver) watch() {
 	keyPrefix := fmt.Sprintf("%s://%s", e.target.Scheme, e.target.Authority)
-	fmt.Println(keyPrefix)
+	log.Println("keyPrefix", keyPrefix)
 	resp, err := e.client.Get(context.TODO(), keyPrefix, clientv3.WithPrefix())
 	if err != nil {
 		panic(err)
@@ -55,6 +56,7 @@ func (e etcdResolver) watch() {
 		}
 		addresses = append(addresses, addr)
 	}
+	log.Println("addresses:", addresses)
 	var state resolver.State
 	state = resolver.State{
 		Addresses:     addresses,
