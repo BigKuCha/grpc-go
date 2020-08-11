@@ -27,15 +27,15 @@ type server struct{}
 
 func (s *server) StreamUserInfo(infoServer pb.UserService_StreamUserInfoServer) error {
 	var err error
-	for i := 0; i < 3; i++ {
+	for i := 1; i < 4; i++ {
 		err = infoServer.Send(&pb.User{
-			ID:     0,
+			ID:     int32(i),
 			Name:   "stream",
 			Mobile: "199898989898",
-			Age:    100,
+			Age:    int32(i) * 10,
 		})
-		log.Println("stream!!!!")
 	}
+	log.Println("stream send finished")
 	return err
 }
 

@@ -12,6 +12,7 @@ import (
 	"go.etcd.io/etcd/clientv3/balancer/picker"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"io"
 	"log"
 	"time"
 )
@@ -61,13 +62,15 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	u := new(pb.User)
-	for i := 0; i < 3; i++ {
-		err = infoclient.RecvMsg(u)
+	for {
+		u, err := infoclient.Recv()
+		if err == io.EOF {
+			log.Println("接收完毕")
+			break
+		}
 		if err != nil {
 			panic(err)
 		}
-		time.Sleep(time.Second)
 		fmt.Println(u)
 	}
 }
