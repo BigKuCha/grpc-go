@@ -10,6 +10,9 @@ service UserService {
     // 创建用户，传入用户信息，创建成功返回用户完整信息
     rpc Create (User) returns (User) {
     }
+    // 流模式
+    rpc StreamUserInfo (stream User) returns (stream User) {
+    }
 }
 
 // 请求查询用户

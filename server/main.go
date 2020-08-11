@@ -6,7 +6,9 @@ import (
 	pb "github.com/bigkucha/grpc-go/proto"
 	etcdresolver "github.com/bigkucha/grpc-go/resolver"
 	"github.com/bigkucha/grpc-go/trace"
-	zipkingrpc "github.com/openzipkin/zipkin-go/middleware/grpc"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
+	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	"go.etcd.io/etcd/clientv3"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -22,6 +24,20 @@ const serviceName = "UserService"
 
 // server is used to implement
 type server struct{}
+
+func (s *server) StreamUserInfo(infoServer pb.UserService_StreamUserInfoServer) error {
+	var err error
+	for i := 0; i < 3; i++ {
+		err = infoServer.Send(&pb.User{
+			ID:     0,
+			Name:   "stream",
+			Mobile: "199898989898",
+			Age:    100,
+		})
+		log.Println("stream!!!!")
+	}
+	return err
+}
 
 func (s *server) GetUserInfo(ctx context.Context, in *pb.RequestUser) (*pb.User, error) {
 	log.Printf("请求查看用户 %d 的信息", in.Id)
@@ -79,12 +95,40 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	tracer := trace.GetZipkinBasicTracer("GRPCServer", addr)
-	s := grpc.NewServer(grpc.StatsHandler(zipkingrpc.NewServerHandler(tracer)))
+	//tracer := trace.GetZipkinBasicTracer("GRPCServer", addr)
+	tracer := trace.GetZipkinTracer("GRPCServer", addr)
+	//s := grpc.NewServer(grpc.StatsHandler(zipkingrpc.NewServerHandler(tracer)))
+	s := grpc.NewServer(
+		grpc.StreamInterceptor(
+			grpc_middleware.ChainStreamServer(
+				grpc_ctxtags.StreamServerInterceptor(),
+				grpc_opentracing.StreamServerInterceptor(grpc_opentracing.WithTracer(tracer)),
+				streamServerInterceptor(),
+			)),
+		grpc.UnaryInterceptor(
+			grpc_middleware.ChainUnaryServer(
+				grpc_opentracing.UnaryServerInterceptor(grpc_opentracing.WithTracer(tracer)),
+				UnaryServerInterceptor(),
+			),
+		),
+	)
 	pb.RegisterUserServiceServer(s, &server{})
 	// Register reflection service on gRPC server.
 	reflection.Register(s)
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
+	}
+}
+
+func UnaryServerInterceptor() grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+		log.Println("haha, unary interceptor")
+		return handler(ctx, req)
+	}
+}
+func streamServerInterceptor() grpc.StreamServerInterceptor {
+	return func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+		log.Println("middleware")
+		return handler(srv, ss)
 	}
 }

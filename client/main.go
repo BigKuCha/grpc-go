@@ -39,7 +39,11 @@ func main() {
 	ctx, _ := context.WithTimeout(context.Background(), 2*time.Second)
 	tracer := trace.GetZipkinBasicTracer("GrpcClient", "localhost:0")
 
-	conn, err := grpc.DialContext(ctx, target, grpc.WithInsecure(), grpc.WithBlock(), grpc.WithStatsHandler(zipkingrpc.NewClientHandler(tracer)))
+	var conn, err = grpc.DialContext(
+		ctx, target, grpc.WithInsecure(), grpc.WithBlock(),
+		grpc.WithStatsHandler(zipkingrpc.NewClientHandler(tracer)),
+		grpc.WithChainStreamInterceptor(),
+	)
 	if err != nil {
 		log.Fatalf("did not connect %v\n", err)
 	}
@@ -51,6 +55,19 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Printf("用户信息:%#v", r)
-	time.Sleep(5 * time.Second)
+	fmt.Printf("用户信息:%#v\n", r)
+
+	infoclient, err := c.StreamUserInfo(context.Background())
+	if err != nil {
+		panic(err)
+	}
+	u := new(pb.User)
+	for i := 0; i < 3; i++ {
+		err = infoclient.RecvMsg(u)
+		if err != nil {
+			panic(err)
+		}
+		time.Sleep(time.Second)
+		fmt.Println(u)
+	}
 }

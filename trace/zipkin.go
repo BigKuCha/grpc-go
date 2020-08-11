@@ -33,7 +33,7 @@ func GetZipkinTracer(serviceName string, hostPort string) opentracing.Tracer {
 	tracer := zipkinot.Wrap(nativeTracer)
 
 	// optionally set as Global OpenTracing tracer instance
-	opentracing.SetGlobalTracer(tracer)
+	//opentracing.SetGlobalTracer(tracer)
 	return tracer
 }
 

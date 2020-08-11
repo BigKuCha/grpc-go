@@ -3,13 +3,14 @@
 
 package user
 
-import proto "github.com/golang/protobuf/proto"
-import fmt "fmt"
-import math "math"
-
 import (
-	context "golang.org/x/net/context"
+	context "context"
+	fmt "fmt"
+	proto "github.com/golang/protobuf/proto"
 	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
+	math "math"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -21,7 +22,7 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 // 请求查询用户
 type RequestUser struct {
@@ -35,16 +36,17 @@ func (m *RequestUser) Reset()         { *m = RequestUser{} }
 func (m *RequestUser) String() string { return proto.CompactTextString(m) }
 func (*RequestUser) ProtoMessage()    {}
 func (*RequestUser) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_b111af9438d78f8a, []int{0}
+	return fileDescriptor_116e343673f7ffaf, []int{0}
 }
+
 func (m *RequestUser) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RequestUser.Unmarshal(m, b)
 }
 func (m *RequestUser) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_RequestUser.Marshal(b, m, deterministic)
 }
-func (dst *RequestUser) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RequestUser.Merge(dst, src)
+func (m *RequestUser) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RequestUser.Merge(m, src)
 }
 func (m *RequestUser) XXX_Size() int {
 	return xxx_messageInfo_RequestUser.Size(m)
@@ -76,16 +78,17 @@ func (m *User) Reset()         { *m = User{} }
 func (m *User) String() string { return proto.CompactTextString(m) }
 func (*User) ProtoMessage()    {}
 func (*User) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_b111af9438d78f8a, []int{1}
+	return fileDescriptor_116e343673f7ffaf, []int{1}
 }
+
 func (m *User) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_User.Unmarshal(m, b)
 }
 func (m *User) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_User.Marshal(b, m, deterministic)
 }
-func (dst *User) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_User.Merge(dst, src)
+func (m *User) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_User.Merge(m, src)
 }
 func (m *User) XXX_Size() int {
 	return xxx_messageInfo_User.Size(m)
@@ -129,6 +132,26 @@ func init() {
 	proto.RegisterType((*User)(nil), "user.User")
 }
 
+func init() { proto.RegisterFile("user.proto", fileDescriptor_116e343673f7ffaf) }
+
+var fileDescriptor_116e343673f7ffaf = []byte{
+	// 209 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x2a, 0x2d, 0x4e, 0x2d,
+	0xd2, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0x01, 0xb1, 0x95, 0x64, 0xb9, 0xb8, 0x83, 0x52,
+	0x0b, 0x4b, 0x53, 0x8b, 0x4b, 0x42, 0x8b, 0x53, 0x8b, 0x84, 0xf8, 0xb8, 0x98, 0x32, 0x53, 0x24,
+	0x18, 0x15, 0x18, 0x35, 0x58, 0x83, 0x98, 0x32, 0x53, 0x94, 0x42, 0xb8, 0x58, 0x60, 0xe2, 0x9e,
+	0x2e, 0x12, 0x4c, 0x10, 0x71, 0x4f, 0x17, 0x21, 0x21, 0x2e, 0x16, 0xbf, 0xc4, 0xdc, 0x54, 0x09,
+	0x66, 0x05, 0x46, 0x0d, 0xce, 0x20, 0x30, 0x5b, 0x48, 0x8c, 0x8b, 0xcd, 0x37, 0x3f, 0x29, 0x33,
+	0x27, 0x55, 0x82, 0x05, 0x2c, 0x0a, 0xe5, 0x09, 0x09, 0x70, 0x31, 0x3b, 0xa6, 0xa7, 0x4a, 0xb0,
+	0x82, 0x35, 0x83, 0x98, 0x46, 0x13, 0x19, 0xb9, 0xb8, 0x41, 0xc6, 0x06, 0xa7, 0x16, 0x95, 0x65,
+	0x26, 0xa7, 0x0a, 0xe9, 0x71, 0x71, 0xbb, 0xa7, 0x82, 0x1d, 0xe0, 0x99, 0x97, 0x96, 0x2f, 0x24,
+	0xa8, 0x07, 0x76, 0x26, 0x92, 0xbb, 0xa4, 0xb8, 0x20, 0x42, 0x20, 0xb6, 0x12, 0x83, 0x90, 0x12,
+	0x17, 0x9b, 0x73, 0x51, 0x6a, 0x62, 0x49, 0xaa, 0x10, 0x92, 0x38, 0x9a, 0x1a, 0x3d, 0x2e, 0xbe,
+	0xe0, 0x92, 0xa2, 0xd4, 0xc4, 0x5c, 0xb8, 0xb1, 0x38, 0xd5, 0x6a, 0x30, 0x1a, 0x30, 0x26, 0xb1,
+	0x81, 0x43, 0xc5, 0x18, 0x10, 0x00, 0x00, 0xff, 0xff, 0x41, 0x63, 0x58, 0x4c, 0x23, 0x01, 0x00,
+	0x00,
+}
+
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
 var _ grpc.ClientConn
@@ -145,6 +168,8 @@ type UserServiceClient interface {
 	GetUserInfo(ctx context.Context, in *RequestUser, opts ...grpc.CallOption) (*User, error)
 	// 创建用户，传入用户信息，创建成功返回用户完整信息
 	Create(ctx context.Context, in *User, opts ...grpc.CallOption) (*User, error)
+	// 流模式
+	StreamUserInfo(ctx context.Context, opts ...grpc.CallOption) (UserService_StreamUserInfoClient, error)
 }
 
 type userServiceClient struct {
@@ -173,12 +198,59 @@ func (c *userServiceClient) Create(ctx context.Context, in *User, opts ...grpc.C
 	return out, nil
 }
 
+func (c *userServiceClient) StreamUserInfo(ctx context.Context, opts ...grpc.CallOption) (UserService_StreamUserInfoClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_UserService_serviceDesc.Streams[0], "/user.UserService/StreamUserInfo", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &userServiceStreamUserInfoClient{stream}
+	return x, nil
+}
+
+type UserService_StreamUserInfoClient interface {
+	Send(*User) error
+	Recv() (*User, error)
+	grpc.ClientStream
+}
+
+type userServiceStreamUserInfoClient struct {
+	grpc.ClientStream
+}
+
+func (x *userServiceStreamUserInfoClient) Send(m *User) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *userServiceStreamUserInfoClient) Recv() (*User, error) {
+	m := new(User)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 type UserServiceServer interface {
 	// 获取用户，传入ID，返回用户信息
 	GetUserInfo(context.Context, *RequestUser) (*User, error)
 	// 创建用户，传入用户信息，创建成功返回用户完整信息
 	Create(context.Context, *User) (*User, error)
+	// 流模式
+	StreamUserInfo(UserService_StreamUserInfoServer) error
+}
+
+// UnimplementedUserServiceServer can be embedded to have forward compatible implementations.
+type UnimplementedUserServiceServer struct {
+}
+
+func (*UnimplementedUserServiceServer) GetUserInfo(ctx context.Context, req *RequestUser) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserInfo not implemented")
+}
+func (*UnimplementedUserServiceServer) Create(ctx context.Context, req *User) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
+}
+func (*UnimplementedUserServiceServer) StreamUserInfo(srv UserService_StreamUserInfoServer) error {
+	return status.Errorf(codes.Unimplemented, "method StreamUserInfo not implemented")
 }
 
 func RegisterUserServiceServer(s *grpc.Server, srv UserServiceServer) {
@@ -221,6 +293,32 @@ func _UserService_Create_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_StreamUserInfo_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(UserServiceServer).StreamUserInfo(&userServiceStreamUserInfoServer{stream})
+}
+
+type UserService_StreamUserInfoServer interface {
+	Send(*User) error
+	Recv() (*User, error)
+	grpc.ServerStream
+}
+
+type userServiceStreamUserInfoServer struct {
+	grpc.ServerStream
+}
+
+func (x *userServiceStreamUserInfoServer) Send(m *User) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *userServiceStreamUserInfoServer) Recv() (*User, error) {
+	m := new(User)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 var _UserService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "user.UserService",
 	HandlerType: (*UserServiceServer)(nil),
@@ -234,24 +332,13 @@ var _UserService_serviceDesc = grpc.ServiceDesc{
 			Handler:    _UserService_Create_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "StreamUserInfo",
+			Handler:       _UserService_StreamUserInfo_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "user.proto",
-}
-
-func init() { proto.RegisterFile("user.proto", fileDescriptor_user_b111af9438d78f8a) }
-
-var fileDescriptor_user_b111af9438d78f8a = []byte{
-	// 190 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x54, 0x8f, 0x4f, 0xcb, 0x82, 0x40,
-	0x10, 0x87, 0x5f, 0x75, 0x15, 0xde, 0x11, 0xa2, 0xe6, 0x10, 0x4b, 0x10, 0xc8, 0x9e, 0x3c, 0x79,
-	0xa8, 0x4f, 0x10, 0x09, 0xe1, 0xa1, 0x0e, 0x56, 0x1f, 0x40, 0x73, 0x8a, 0x85, 0x6a, 0x6b, 0x5d,
-	0xfb, 0xfc, 0xb1, 0x6b, 0x81, 0xdd, 0x9e, 0x79, 0x98, 0x3f, 0xbf, 0x01, 0xe8, 0x5a, 0xd2, 0xd9,
-	0x43, 0x2b, 0xa3, 0x90, 0x59, 0x16, 0x73, 0x88, 0x4b, 0x7a, 0x76, 0xd4, 0x9a, 0x63, 0x4b, 0x1a,
-	0x47, 0xe0, 0xcb, 0x86, 0x7b, 0x89, 0x97, 0x86, 0xa5, 0x2f, 0x1b, 0x71, 0x00, 0xf6, 0xf5, 0x45,
-	0xce, 0xfd, 0xde, 0x17, 0x39, 0x22, 0xb0, 0x5d, 0x75, 0x23, 0x1e, 0x24, 0x5e, 0xfa, 0x5f, 0x3a,
-	0xc6, 0x29, 0x44, 0x5b, 0x55, 0xcb, 0x2b, 0x71, 0xe6, 0xec, 0xa7, 0xc2, 0x31, 0x04, 0xab, 0x0b,
-	0xf1, 0xd0, 0x0d, 0x5b, 0x5c, 0x54, 0x10, 0xdb, 0xad, 0x7b, 0xd2, 0x2f, 0x79, 0x22, 0xcc, 0x20,
-	0xde, 0x90, 0xbb, 0x5f, 0xdc, 0xcf, 0x0a, 0x27, 0x99, 0x4b, 0x39, 0x88, 0x35, 0x83, 0x5e, 0x59,
-	0x16, 0x7f, 0x28, 0x20, 0x5a, 0x6b, 0xaa, 0x0c, 0xe1, 0xc0, 0xff, 0xf6, 0xd4, 0x91, 0x7b, 0x72,
-	0xf9, 0x0e, 0x00, 0x00, 0xff, 0xff, 0xe1, 0x2d, 0x66, 0x9d, 0xf2, 0x00, 0x00, 0x00,
 }
