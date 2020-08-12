@@ -98,6 +98,11 @@ func main() {
 	//tracer := trace.GetZipkinBasicTracer("GRPCServer", addr)
 	tracer := trace.GetZipkinTracer("GRPCServer", addr)
 	//s := grpc.NewServer(grpc.StatsHandler(zipkingrpc.NewServerHandler(tracer)))
+	opts := []grpc_ctxtags.Option{
+		// 记录rpc请求体的数据，key为结构体标签json值
+		grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.TagBasedRequestFieldExtractor("json")),
+		grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor),
+	}
 	s := grpc.NewServer(
 		grpc.StreamInterceptor(
 			grpc_middleware.ChainStreamServer(
@@ -107,8 +112,10 @@ func main() {
 			)),
 		grpc.UnaryInterceptor(
 			grpc_middleware.ChainUnaryServer(
+				grpc_ctxtags.UnaryServerInterceptor(opts...),
 				grpc_opentracing.UnaryServerInterceptor(grpc_opentracing.WithTracer(tracer)),
 				UnaryServerInterceptor(),
+				UnaryServerInterceptor2(),
 			),
 		),
 	)
@@ -120,10 +127,19 @@ func main() {
 	}
 }
 
+func UnaryServerInterceptor2() grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+		log.Println("unary interceptor 222", ctx.Value("kkkk"))
+		log.Printf("%#v", ctx)
+		return handler(ctx, req)
+	}
+}
+
 func UnaryServerInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
-		log.Println("haha, unary interceptor")
-		return handler(ctx, req)
+		log.Println("haha, unary interceptor", ctx.Value("peer.address"))
+		newCtx := context.WithValue(ctx, "kkkk", "hello from unary 1")
+		return handler(newCtx, req)
 	}
 }
 func streamServerInterceptor() grpc.StreamServerInterceptor {
